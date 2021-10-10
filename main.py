@@ -1,6 +1,8 @@
 import sys
+from time import sleep
 import pygame
 from settings import Settings
+from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -17,7 +19,11 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode(
             (self.settings.screen_width, self.settings.screen_height))
 
+        """create stats when game start"""
+        self.stats = GameStats(self)
+
         pygame.display.set_caption('Alien Invasion')
+        self.bg = pygame.image.load('img/background.png')
         self.ship = Ship(self)
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
@@ -29,15 +35,15 @@ class AlienInvasion:
         self._create_fleet()
 
         while True:
-            self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_aliens()
-            self._update_screen()
+            if self.stats.game_active:
+                self._check_events()
+                self.ship.update()
+                self._update_bullets()
+                self._update_aliens()
+                self._update_screen()
 
-            """Перемалювати екран на кожній ітерації циклу"""
-            self.screen.fill(self.settings.bg_color)
-            self.ship.blitme()
+            else:
+                sys.exit()
 
     def _check_events(self):
         """Реагувати на натискання клавіартури та миші"""
@@ -90,8 +96,6 @@ class AlienInvasion:
         collisions = pygame.sprite.groupcollide(
             self.bullets, self.aliens, True, True)
 
-
-
     def _create_fleet(self):
         # Create aliens fleet
         alien = Alien(self)
@@ -133,10 +137,37 @@ class AlienInvasion:
         self._check_fleet_edges()
         self.aliens.update()
 
+        #if spaceship hits with alien
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._ship_hit()
+
+        self._check_alien_bottom()
+
+    def _ship_hit(self):
+        if self.stats.ships_left > 0:
+            self._update_screen()
+            self.stats.ships_left -= 1
+            self.aliens.empty()
+            self.bullets.empty()
+            self._create_fleet()
+            self.ship.center_ship()
+            print(self.stats.ships_left)
+            sleep(0.5)
+        else:
+            self.stats.game_active = False
+
+    def _check_alien_bottom(self):
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+                self._ship_hit()
+                break
+
     def _update_screen(self):
         """Оновлювати зображення на екрані та перемканутися на новий екран"""
-        self.screen.fill(self.settings.bg_color)
+        self.screen.blit(self.settings.bg.convert(), (0, 0))
         self.ship.blitme()
+
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)

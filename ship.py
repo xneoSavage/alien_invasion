@@ -18,7 +18,7 @@ class Ship:
         self.rect = self.image.get_rect()
 
         """Створювати кожен новий корабель внизу екрану, по центру"""
-        self.rect.center = self.screen_rect.center
+        self.rect.midbottom = self.screen_rect.midbottom
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
 
@@ -41,3 +41,8 @@ class Ship:
     def blitme(self):
         """Намалювати корабель у поточному розташуванні"""
         self.screen.blit(self.image, self.rect)
+
+    def center_ship(self):
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = self.rect.x
+        self.y = self.rect.y
