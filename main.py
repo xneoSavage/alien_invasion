@@ -208,8 +208,10 @@ class AlienInvasion:
 
         self.aliens.draw(self.screen)
 
-        if not self.stats.game_active:
+        if not self.stats.game_active and pygame.mouse.get_visible():
             self.play_button.draw_button()
+        elif not self.stats.game_active:
+            self.pause_button.draw_button()
 
         pygame.display.flip()
 
