@@ -14,3 +14,4 @@ class GameStats:
         self.ships_left = self.setting.ship_limit
 
 
+

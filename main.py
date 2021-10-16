@@ -28,16 +28,17 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
 
-        self._create_fleet()
         self.play_button = Button(self, 'Play')
         self.pause_button = Button(self, 'Pause')
+
+        self.shot_sound = pygame.mixer.Sound('sound/spaceship_shot.wav')
 
     def run_game(self):
         """Розпочати головний цикл гри"""
         self._create_fleet()
         while True:
             self._check_events()
-
+            self._check_bullet_alien_collisions()
             if self.stats.game_active:
                 self.ship.update()
                 self._update_bullets()
@@ -75,7 +76,7 @@ class AlienInvasion:
         elif event.key == pygame.K_p:
             self._pause_game()
         elif event.key == pygame.K_SPACE:
-            if not self.stats.game_active:
+            if not self.stats.game_active and pygame.mouse.get_visible():
                 self._start_game()
             else:
                 self._fire_bullet()
@@ -90,13 +91,12 @@ class AlienInvasion:
             self.ship.moving_up = False
         elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
             self.ship.moving_down = False
-        elif event.key == pygame.K_SPACE:
-            self._fire_bullet()
 
     def _fire_bullet(self):
-        if len(self.bullets) < self.settings.bullet_allowed:
+        if len(self.bullets) < self.settings.bullet_allowed and self.stats.game_active:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
+            self.shot_sound.play()
 
     def _update_bullets(self):
         self.bullets.update()
@@ -144,6 +144,12 @@ class AlienInvasion:
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
 
+    def _check_bullet_alien_collisions(self):
+        if not self.aliens:
+            self.bullets.empty()
+            self._create_fleet()
+            self.settings.increase_speed()
+
     def _update_aliens(self):
         self._check_fleet_edges()
         self.aliens.update()
@@ -166,6 +172,7 @@ class AlienInvasion:
             sleep(0.5)
         else:
             self.stats.game_active = False
+            self.settings.init_dynamic_settings()
             pygame.mouse.set_visible(True)
 
     def _check_alien_bottom(self):
