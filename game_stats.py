@@ -12,6 +12,6 @@ class GameStats:
     def reset_stats(self):
         """Init stat what can change during game"""
         self.ships_left = self.setting.ship_limit
-
+        self.score = 0
 
 
