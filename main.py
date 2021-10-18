@@ -181,6 +181,7 @@ class AlienInvasion:
             self.stats.game_active = False
             self.settings.init_dynamic_settings()
             pygame.mouse.set_visible(True)
+            self.sb.write_records()
 
     def _check_alien_bottom(self):
         screen_rect = self.screen.get_rect()
@@ -197,6 +198,7 @@ class AlienInvasion:
             self._start_game()
 
     def _start_game(self):
+        self.sb.show_record()
         pygame.mouse.set_visible(False)
         self.stats.reset_stats()
         self.stats.game_active = True
